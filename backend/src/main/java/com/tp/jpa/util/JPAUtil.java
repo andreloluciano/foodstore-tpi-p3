@@ -30,3 +30,15 @@ public class JPAUtil {
         }
     }
 }
+
+
+/* 1. limpiar archivos generados y duplicados
+2. renombrar EstadoPedido a Estado
+3. cambiar contraseña por contrasena
+4. implementar ProductoRepository, UsuarioRepository y PedidoRepository
+5. migrar categorías desde el segundo parcial
+6. migrar productos desde el segundo parcial, adaptando la relación con Categoria
+7. implementar usuarios
+8. implementar pedidos
+9. implementar reportes
+10. probar flujo completo */
