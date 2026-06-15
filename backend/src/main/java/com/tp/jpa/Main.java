@@ -184,19 +184,108 @@ public class Main {
     // ── categorias ─────────────────────────────────────────────────
 
     private static void altaCategoria() {
-        System.out.println("[alta categoria] pendiente");
+        System.out.print("nombre: ");
+        String nombre = sc.nextLine();
+
+        if (nombre.isBlank()) {
+            System.out.println("el nombre no puede estar vacio");
+            return;
+        }
+
+        System.out.print("descripcion: ");
+        String descripcion = sc.nextLine();
+
+        Categoria categoria = Categoria.builder()
+                .nombre(nombre)
+                .descripcion(descripcion)
+                .build(); // eliminado y fecha vienen por default
+
+        Categoria categoriaGuardada = categoriaRepo.guardar(categoria); // guardo en variable para mostrar id
+
+        System.out.println("categoria " + categoriaGuardada.getNombre()
+                + " creada con id: " + categoriaGuardada.getId());
     }
 
     private static void modificarCategoria() {
-        System.out.println("[modificar categoria] pendiente");
+
+        System.out.println("categorias disponibles para modificar: ");
+        listarCategorias();
+
+        System.out.print("id de categoria a editar: ");
+        Long id = leerLong();
+
+        Categoria categoria = categoriaRepo.buscarPorId(id).orElse(null);
+
+        if (categoria == null || categoria.isEliminado()) {
+            System.out.println("no existe una categoria activa con ese id");
+            return;
+        }
+
+        System.out.println("nombre actual: " + categoria.getNombre());
+        System.out.print("nuevo nombre: ");
+        String nombre = sc.nextLine();
+
+        System.out.println("descripcion actual: " + categoria.getDescripcion());
+        System.out.print("nueva descripcion: ");
+        String descripcion = sc.nextLine();
+
+        if (!nombre.isBlank()) {
+            categoria.setNombre(nombre);
+        }
+
+        if (!descripcion.isBlank()) {
+            categoria.setDescripcion(descripcion);
+        }
+
+        categoriaRepo.guardar(categoria);
+
+        System.out.println("categoria modificada correctamente");
     }
 
     private static void bajaCategoria() {
-        System.out.println("[baja categoria] pendiente");
+
+        System.out.println("categorias disponibles para eliminar: ");
+        listarCategorias();
+
+        System.out.print("id de categoria a eliminar: ");
+        Long id = leerLong();
+
+        // guardo en variable para obtener su nombre
+        Categoria categoria = categoriaRepo.buscarPorId(id).orElse(null);
+
+        // valido que exista y no este eliminada
+        if (categoria == null || categoria.isEliminado()) {
+            System.out.println("no existe una categoria activa con ese id");
+            return;
+        }
+
+        boolean eliminada = categoriaRepo.eliminarLogico(id);
+
+        if (eliminada) { // uso el boolean de eliminar
+            System.out.println("categoria " + categoria.getNombre() + ", id: "
+                    + categoria.getId() + " eliminada");
+        } else {
+            System.out.println("no se pudo eliminar la categoria");
+        }
     }
 
     private static void listarCategorias() {
-        System.out.println("[listar categorias] pendiente");
+        List<Categoria> categorias = categoriaRepo.listarActivos();
+
+        if (categorias.isEmpty()) {
+            System.out.println("no hay categorias activas");
+            return;
+        }
+
+        for (Categoria categoria : categorias) {
+            System.out.println(
+                    categoria.getId()
+                            + " - "
+                            + categoria.getNombre()
+                            + " - "
+                            + categoria.getDescripcion()
+            );
+        }
     }
 
 // ── productos ─────────────────────────────────────────────────
@@ -279,6 +368,18 @@ public class Main {
 
     private static int leerEntero() {
         int valor = sc.nextInt();
+        sc.nextLine();
+        return valor;
+    }
+
+    private static Long leerLong() {
+        Long valor = sc.nextLong();
+        sc.nextLine();
+        return valor;
+    }
+
+    private static Double leerDouble() {
+        Double valor = sc.nextDouble();
         sc.nextLine();
         return valor;
     }
