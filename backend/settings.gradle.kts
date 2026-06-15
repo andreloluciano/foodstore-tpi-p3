@@ -1,0 +1,1 @@
+rootProject.name = "6_lombok_DTO"

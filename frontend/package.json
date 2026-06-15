@@ -1,0 +1,21 @@
+{
+  "name": "utn-tupad-p3",
+  "version": "1.0.0",
+  "description": "**Tecnicatura Universitaria en Programación**  \r 📍 *Universidad Tecnológica Nacional*",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/andreloluciano/UTN-TUPaD-P3.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/andreloluciano/UTN-TUPaD-P3/issues"
+  },
+  "homepage": "https://github.com/andreloluciano/UTN-TUPaD-P3#readme"
+}

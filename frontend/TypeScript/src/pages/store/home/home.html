@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Geek Food Store</title>
+    <link rel="stylesheet" href="../store.css">
+</head>
+<body>
+
+<header>
+    <h1>Geek Food Store</h1>
+    <nav>
+        <ul>
+            <li><a href="/src/pages/client/home/home.html">Inicio</a></li> 
+            <li><a href="/src/pages/store/cart/cart.html">Carrito</a></li>
+            <li><a href="/src/pages/auth/login/login.html">Panel Admin</a></li>
+        </ul>
+    </nav>
+</header>
+<hr>
+<aside>
+    <h2>Categorías</h2>
+    <ul id="lista-categorias"></ul> 
+</aside>
+
+<main>
+    <section>
+        <label for="buscar">Buscar productos:</label>
+        <input type="text" id="buscar" placeholder="Ej: Hamburguesa">
+    </section>
+
+    <section id="contenedor-productos">
+        <h2>Productos</h2>
+    </section>
+</main>
+
+<footer>
+    <h3>Información Adicional</h3>
+    <p>Ubicación: Buenos Aires, Argentina.</p>
+    <p>&copy; 2026 Luciano Andrelo - Programación 3</p>
+</footer>
+<script type="module" src="./home.ts"></script>
+
+
+</body>
+</html>
+
+<!-- // Video: https://youtu.be/n5tPi3F0ljI --> 

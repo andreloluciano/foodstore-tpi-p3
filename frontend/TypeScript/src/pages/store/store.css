@@ -1,0 +1,141 @@
+* {
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+}
+
+:root {
+  --color-primario: #ff6347;
+  --color-fondo: #f0f0f0;
+  --color-texto: #333;
+  --color-blanco: #fff;
+  --color-borde: #ddd;
+  --color-focus: #ff4500;
+}
+
+body {
+  background-color: var(--color-fondo);
+  color: var(--color-texto);
+}
+
+header {
+  background-color: var(--color-primario);
+  color: var(--color-blanco);
+  padding: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+header h1 {
+  letter-spacing: 2px;
+}
+
+nav ul {
+  display: flex;
+  gap: 15px;
+  list-style: none;
+}
+
+nav a {
+  color: var(--color-blanco);
+  text-decoration: none;
+  font-weight: bold;
+}
+
+main {
+  padding: 25px;
+}
+
+aside {
+  background-color: var(--color-blanco);
+  padding: 20px;
+  margin: 20px;
+  border-radius: 10px;
+  border: 1px solid var(--color-borde);
+}
+
+#lista-categorias {
+  list-style: none;
+  margin-top: 10px;
+}
+
+#lista-categorias li {
+  padding: 8px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+#lista-categorias li:hover {
+  color: var(--color-primario);
+}
+
+input {
+  padding: 10px;
+  border: 2px solid var(--color-borde);
+  border-radius: 8px;
+  font-size: 14px;
+  margin: 10px 0 20px;
+  width: 100%;
+}
+
+input:focus {
+  outline: none;
+  border-color: var(--color-focus);
+}
+
+#contenedor-productos,
+#cart-container {
+  display: grid;
+  gap: 20px;
+}
+
+#contenedor-productos div,
+#cart-container div {
+  background-color: var(--color-blanco);
+  padding: 20px;
+  border-radius: 10px;
+  border: 1px solid var(--color-borde);
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.08);
+}
+
+h2 {
+  margin-bottom: 15px;
+}
+
+h3 {
+  color: var(--color-primario);
+  margin-bottom: 8px;
+}
+
+p {
+  margin-bottom: 8px;
+}
+
+button {
+  background-color: var(--color-primario);
+  color: var(--color-blanco);
+  padding: 10px 14px;
+  border: none;
+  border-radius: 5px;
+  font-weight: bold;
+  cursor: pointer;
+  margin: 5px;
+}
+
+button:hover {
+  background-color: var(--color-focus);
+}
+
+#total {
+  margin: 20px;
+  color: var(--color-texto);
+}
+
+footer {
+  margin-top: 30px;
+  padding: 20px;
+  text-align: center;
+  background-color: var(--color-blanco);
+  border-top: 1px solid var(--color-borde);
+}
