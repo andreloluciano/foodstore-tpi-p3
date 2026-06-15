@@ -1,5 +1,8 @@
 package com.tp.jpa;
 
+import java.util.logging.LogManager;
+import java.util.logging.Logger;
+import java.util.logging.Level;
 import com.tp.jpa.repository.CategoriaRepository;
 import com.tp.jpa.repository.PedidoRepository;
 import com.tp.jpa.repository.ProductoRepository;
@@ -7,14 +10,27 @@ import com.tp.jpa.repository.UsuarioRepository;
 import java.util.List;
 import com.tp.jpa.util.JPAUtil;
 import com.tp.jpa.model.Categoria;
+import com.tp.jpa.model.Categoria;
+import com.tp.jpa.model.Producto;
+import jakarta.persistence.EntityManager;
+import java.util.List;
 
 import java.util.Scanner;
+
 
 /**
  * Clase principal: menú de consola del sistema Food Store.
  * Orden de uso natural: Categorías -> Productos -> Usuarios -> Pedidos.
  */
 public class Main {
+
+    static {
+        LogManager.getLogManager().reset();
+        Logger.getLogger("").setLevel(Level.SEVERE);
+        Logger.getLogger("org.hibernate").setLevel(Level.SEVERE);
+        Logger.getLogger("org.hibernate.SQL").setLevel(Level.OFF);
+        Logger.getLogger("org.hibernate.orm.jdbc.bind").setLevel(Level.OFF);
+    }
 
     private static final Scanner sc = new Scanner(System.in);
 
@@ -24,6 +40,10 @@ public class Main {
     private static final PedidoRepository pedidoRepo = new PedidoRepository();
 
     public static void main(String[] args) {
+
+        LogManager.getLogManager().reset();
+        Logger.getLogger("org.hibernate").setLevel(Level.SEVERE);
+
         boolean salir = false;
         while (!salir) {
             System.out.println();
@@ -291,23 +311,286 @@ public class Main {
 // ── productos ─────────────────────────────────────────────────
 
     private static void altaProducto() {
-        System.out.println("[alta producto] pendiente");
+
+        // categorias activas
+        System.out.println("categorias disponibles: ");
+        List<Categoria> categorias = categoriaRepo.listarActivos();
+
+        if (categorias.isEmpty()) {
+            System.out.println("no hay categorias disponibles");
+            return;
+        }
+
+        for (Categoria categoria : categorias) { // muestro las opciones
+            System.out.println(
+                    categoria.getId()
+                            + " - "
+                            + categoria.getNombre()
+            );
+        }
+
+        System.out.print("id de categoria: ");
+        Long idCategoria = leerLong();
+
+        // busco y valido
+        Categoria categoria = categoriaRepo.buscarPorId(idCategoria).orElse(null);
+        if (categoria == null || categoria.isEliminado()) {
+            System.out.println("categoria no encontrada");
+            return;
+        }
+
+        // solicito nombre
+        System.out.print("nombre: ");
+        String nombre = sc.nextLine();
+
+        if (nombre.isBlank()) {
+            System.out.println("el nombre no puede estar vacio");
+            return;
+        }
+
+        // pido descripcion
+        System.out.print("descripcion: ");
+        String descripcion = sc.nextLine();
+
+        // pido y valido precio
+        System.out.print("precio: ");
+        Double precio = leerDouble();
+
+        if (precio <= 0) {
+            System.out.println("el precio debe ser mayor a 0");
+            return;
+        }
+
+        // pido y valido stock
+        System.out.print("stock: ");
+        int stock = leerEntero();
+
+        if (stock < 0) {
+            System.out.println("el stock no puede ser negativo");
+            return;
+        }
+
+        System.out.print("imagen: ");
+        String imagen = sc.nextLine();
+
+        System.out.print("disponible s/n: ");
+        String disponibleTexto = sc.nextLine();
+
+        boolean disponible = !disponibleTexto.equalsIgnoreCase("n");
+
+        Producto producto = Producto.builder()
+                .nombre(nombre)
+                .descripcion(descripcion)
+                .precio(precio)
+                .stock(stock)
+                .imagen(imagen)
+                .disponible(disponible)
+                .build();
+
+        Producto productoGuardado = productoRepo.guardarProductoEnCategoria(idCategoria, producto);
+
+        if (productoGuardado == null) {
+            System.out.println("no se pudo crear el producto");
+            return;
+        }
+
+        System.out.println( // muestro el id generado y la categoria asignada
+                "producto creado con id: "
+                        + productoGuardado.getId()
+                        + " en categoria: "
+                        + categoria.getNombre()
+        );
     }
 
     private static void modificarProducto() {
-        System.out.println("[modificar producto] pendiente");
+
+        System.out.println("productos disponibles para modificar: ");
+        listarProductos();
+
+        System.out.print("id de producto a modificar: ");
+        Long id = leerLong();
+
+        // busco por id del input
+        Producto producto = productoRepo.buscarPorId(id).orElse(null);
+
+        if (producto == null || producto.isEliminado()) { // valido
+            System.out.println("no existe un producto activo con ese id");
+            return;
+        }
+
+        // inputs para nombre, precio, stock e imagen
+        System.out.println("nombre actual: " + producto.getNombre());
+        System.out.print("nuevo nombre: ");
+        String nombre = sc.nextLine();
+
+        System.out.println("descripcion actual: " + producto.getDescripcion());
+        System.out.print("nueva descripcion: ");
+        String descripcion = sc.nextLine();
+
+        System.out.println("precio actual: " + producto.getPrecio());
+        System.out.print("nuevo precio: ");
+        String precioTexto = sc.nextLine(); // en string para poder dejar input vacio
+
+        System.out.println("stock actual: " + producto.getStock());
+        System.out.print("nuevo stock: ");
+        String stockTexto = sc.nextLine();
+
+        System.out.println("imagen actual: " + producto.getImagen());
+        System.out.print("nueva imagen: ");
+        String imagen = sc.nextLine();
+
+        System.out.println("disponible actual: " + producto.getDisponible());
+        System.out.print("nuevo disponible s/n/vacio para mantener: ");
+        String disponibleTexto = sc.nextLine();
+
+        // si los campos no estan vacios los actualizo, sino mantiene el valor
+        if (!nombre.isBlank()) {
+            producto.setNombre(nombre);
+        }
+
+        if (!descripcion.isBlank()) {
+            producto.setDescripcion(descripcion);
+        }
+
+        if (!precioTexto.isBlank()) {
+            double precio = Double.parseDouble(precioTexto); // convierto a double
+
+            if (precio <= 0) {
+                System.out.println("el precio debe ser mayor a 0");
+                return;
+            }
+
+            producto.setPrecio(precio);
+        }
+
+        if (!stockTexto.isBlank()) {
+            int stock = Integer.parseInt(stockTexto);
+
+            if (stock < 0) {
+                System.out.println("el stock no puede ser negativo");
+                return;
+            }
+
+            producto.setStock(stock);
+        }
+
+        if (!imagen.isBlank()) {
+            producto.setImagen(imagen);
+        }
+
+        if (!disponibleTexto.isBlank()) {
+            producto.setDisponible(!disponibleTexto.equalsIgnoreCase("n"));
+        }
+
+        productoRepo.guardar(producto); // commit
+
+        System.out.println("producto modificado correctamente");
     }
 
     private static void bajaProducto() {
-        System.out.println("[baja producto] pendiente");
+
+        // muestro los productos activos antes de pedir el id
+        System.out.println("productos disponibles: ");
+        listarProductos();
+
+        // pido el id del producto
+        System.out.print("id de producto a eliminar: ");
+        Long id = leerLong();
+
+        // busco por id
+        Producto producto = productoRepo.buscarPorId(id).orElse(null);
+
+        if (producto == null || producto.isEliminado()) { // valido
+            System.out.println("no existe un producto activo con ese id");
+            return;
+        }
+
+        // guardo el valor en una variable para ver si quedo true o false y muestro
+        boolean eliminado = productoRepo.eliminarLogico(id);
+
+        if (eliminado) {
+            System.out.println("producto " + producto.getNombre() + ", id: "
+                    + producto.getId() + " eliminado");
+        } else {
+            System.out.println("no se pudo eliminar el producto");
+        }
     }
 
     private static void listarProductos() {
-        System.out.println("[listar productos] pendiente");
+
+        List<Producto> productos = productoRepo.listarActivos();
+
+        if (productos.isEmpty()) {
+            System.out.println("no hay productos activos");
+            return;
+        }
+
+        for (Producto producto : productos) {
+
+            // busco el nombre de categoria con jpql porque producto no tiene categoria
+            String nombreCategoria = productoRepo.buscarNombreCategoriaProducto(producto.getId());
+
+            System.out.println(
+                    producto.getId()
+                            + " - "
+                            + producto.getNombre()
+                            + " - precio: "
+                            + producto.getPrecio()
+                            + " - stock: "
+                            + producto.getStock()
+                            + " - disponible: "
+                            + producto.getDisponible()
+                            + " - categoria: "
+                            + nombreCategoria
+            );
+        }
     }
 
     private static void productosPorCategoria() {
-        System.out.println("[productos por categoria] pendiente");
+
+        List<Categoria> categorias = categoriaRepo.listarActivos();
+
+        if (categorias.isEmpty()) {
+            System.out.println("no hay categorias activas");
+            return;
+        }
+
+        System.out.println("categorias disponibles: ");
+        listarCategorias();
+
+        System.out.print("id de categoria: ");
+        Long idCategoria = leerLong();
+
+        // busco segun input
+        Categoria categoria = categoriaRepo.buscarPorId(idCategoria).orElse(null);
+
+        // valido
+        if (categoria == null || categoria.isEliminado()) {
+            System.out.println("no existe una categoria activa con ese id");
+            return;
+        }
+
+        // busco con el jpql
+        List<Producto> productos = productoRepo.buscarPorCategoria(idCategoria);
+
+        if (productos.isEmpty()) {
+            System.out.println("no hay productos activos en esta categoria");
+            return;
+        }
+
+        System.out.println("productos de la categoria: " + categoria.getNombre());
+
+        for (Producto producto : productos) {
+            System.out.println(
+                    producto.getId()
+                            + " - "
+                            + producto.getNombre()
+                            + " - precio: "
+                            + producto.getPrecio()
+                            + " - stock: "
+                            + producto.getStock()
+            );
+        }
     }
 
 // ── usuarios ─────────────────────────────────────────────────

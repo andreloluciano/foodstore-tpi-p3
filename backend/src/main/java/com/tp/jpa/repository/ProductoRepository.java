@@ -32,7 +32,59 @@ public class ProductoRepository extends BaseRepository<Producto> {
             em.close();
         }
     }
+    // la query selecciona productos desde la categoria, usando el set productos
+    // filtra por el id de la categoria y por eliminado = false
+
+    // helpers para el menu de productos
+    public Producto guardarProductoEnCategoria(Long idCategoria, Producto producto) {
+        EntityManager em = emf.createEntityManager();
+        try {
+            em.getTransaction().begin();
+
+            Categoria categoria = em.find(Categoria.class, idCategoria);
+
+            if (categoria == null || categoria.isEliminado()) {
+                em.getTransaction().rollback();
+                return null;
+            }
+
+            em.persist(producto); // guardo producto para que tenga id
+            categoria.addProducto(producto); // lo agrego a la categoria
+
+            em.getTransaction().commit();
+
+            return producto;
+        } catch (RuntimeException e) {
+            if (em.getTransaction().isActive()) {
+                em.getTransaction().rollback();
+            }
+            System.out.println("error al guardar producto: " + e.getMessage());
+            return null;
+        } finally {
+            em.close();
+        }
+    }
+
+    public String buscarNombreCategoriaProducto(Long idProducto) {
+        EntityManager em = emf.createEntityManager();
+        try {
+            List<String> nombres = em.createQuery( // busca la categoria de un producto
+                            "SELECT c.nombre FROM Categoria c JOIN c.productos p WHERE p.id = :idProducto",
+                            String.class)
+                    .setParameter("idProducto", idProducto) // parametro
+                    .getResultList(); // devuelvo lista
+
+            if (nombres.isEmpty()) {
+                return "sin categoria";
+            }
+
+            return nombres.getFirst();
+        } finally {
+            em.close();
+        }
+    }
+
+
 }
 
-// la query selecciona productos desde la categoria, usando el set productos
-// filtra por el id de la categoria y por eliminado = false
+
