@@ -1,6 +1,6 @@
 package com.tp.jpa.model;
 
-import com.tp.jpa.model.enums.EstadoPedido;
+import com.tp.jpa.model.enums.Estado;
 import com.tp.jpa.model.enums.FormaPago;
 import jakarta.persistence.*;
 import lombok.*;
@@ -28,7 +28,7 @@ public class Pedido extends Base implements Calculable {
     @Enumerated(EnumType.STRING)
     @Column(name = "estado",nullable = false, length = 30)
     @Builder.Default
-    private EstadoPedido estado = EstadoPedido.PENDIENTE;
+    private Estado estado = Estado.PENDIENTE;
 
     @Column(name = "total", nullable = false)
     @Builder.Default

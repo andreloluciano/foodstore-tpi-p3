@@ -1,6 +1,6 @@
 package com.tp.jpa.model.enums;
 
-public enum EstadoPedido {
+public enum Estado {
     PENDIENTE,
     CONFIRMADO,
     TERMINADO,

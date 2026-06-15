@@ -1,22 +1,11 @@
 package com.tp.jpa;
 
-import com.tp.jpa.model.enums.EstadoPedido;
-import com.tp.jpa.model.*;
-import com.tp.jpa.model.enums.FormaPago;
-import com.tp.jpa.model.enums.Rol;
 import com.tp.jpa.repository.CategoriaRepository;
 import com.tp.jpa.repository.PedidoRepository;
 import com.tp.jpa.repository.ProductoRepository;
 import com.tp.jpa.repository.UsuarioRepository;
 import com.tp.jpa.util.JPAUtil;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.EntityManagerFactory;
-import jakarta.persistence.EntityTransaction;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
-import java.util.Optional;
 import java.util.Scanner;
 
 /**
