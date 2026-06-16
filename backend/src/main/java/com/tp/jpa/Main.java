@@ -10,10 +10,12 @@ import com.tp.jpa.repository.UsuarioRepository;
 import java.util.List;
 import com.tp.jpa.util.JPAUtil;
 import com.tp.jpa.model.Categoria;
-import com.tp.jpa.model.Categoria;
 import com.tp.jpa.model.Producto;
-import jakarta.persistence.EntityManager;
-import java.util.List;
+import com.tp.jpa.model.Usuario;
+import com.tp.jpa.model.enums.Rol;
+import java.util.Optional;
+
+
 
 import java.util.Scanner;
 
@@ -596,23 +598,242 @@ public class Main {
 // ── usuarios ─────────────────────────────────────────────────
 
     private static void altaUsuario() {
-        System.out.println("[alta usuario] pendiente");
+
+        // solicito nombre
+        System.out.print("nombre: ");
+        String nombre = sc.nextLine();
+
+        if (nombre.isBlank()) {
+            System.out.println("el nombre no puede estar vacio");
+            return;
+        }
+
+        // solicito apellido
+        System.out.print("apellido: ");
+        String apellido = sc.nextLine();
+
+        if (apellido.isBlank()) {
+            System.out.println("el apellido no puede estar vacio");
+            return;
+        }
+
+        // solicito mail
+        System.out.print("mail: ");
+        String mail = sc.nextLine();
+
+        if (mail.isBlank()) {
+            System.out.println("el mail no puede estar vacio");
+            return;
+        }
+
+        // busco si ya existe un usuario activo con ese mail
+        Optional<Usuario> usuarioExistente = usuarioRepo.buscarPorMail(mail);
+
+        if (usuarioExistente.isPresent()) {
+            System.out.println("ya existe un usuario activo con ese mail");
+            return;
+        }
+
+        // solicito celular
+        System.out.print("celular: ");
+        String celular = sc.nextLine();
+
+        // solicito contraseña
+        System.out.print("contraseña: ");
+        String contrasena = sc.nextLine();
+
+        if (contrasena.isBlank()) {
+            System.out.println("la contraseña no puede estar vacia");
+            return;
+        }
+
+        // seleccion de rol
+        System.out.println("rol: ");
+        System.out.println("1. admin");
+        System.out.println("2. usuario");
+        System.out.print("opcion: ");
+        int opcionRol = leerEntero();
+        Rol rol;
+
+        if (opcionRol == 1) {
+            rol = Rol.ADMIN;
+        } else if (opcionRol == 2) {
+            rol = Rol.USUARIO;
+        } else {
+            System.out.println("rol invalido");
+            return;
+        }
+
+        // creo el usuario con los datos ingresados
+        Usuario usuario = Usuario.builder()
+                .nombre(nombre)
+                .apellido(apellido)
+                .mail(mail)
+                .celular(celular)
+                .contrasena(contrasena)
+                .rol(rol)
+                .build();
+
+        // guardo y uso el retorno para mostrar el id generado
+        Usuario usuarioGuardado = usuarioRepo.guardar(usuario);
+
+        System.out.println("usuario " + usuarioGuardado.getNombre()
+                + " " + usuarioGuardado.getApellido()
+                + " creado con id: " + usuarioGuardado.getId());
     }
 
     private static void modificarUsuario() {
-        System.out.println("[modificar usuario] pendiente");
+
+        System.out.println("usuarios disponibles para modificar: ");
+        listarUsuarios();
+
+        System.out.print("id de usuario a modificar: ");
+        Long id = leerLong();
+
+        // busco por id del input
+        Usuario usuario = usuarioRepo.buscarPorId(id).orElse(null);
+
+        if (usuario == null || usuario.isEliminado()) { // valido
+            System.out.println("no existe un usuario activo con ese id");
+            return;
+        }
+
+        // muestro valores actuales y pido nuevos datos
+        System.out.println("nombre actual: " + usuario.getNombre());
+        System.out.print("nuevo nombre: ");
+        String nombre = sc.nextLine();
+
+        System.out.println("apellido actual: " + usuario.getApellido());
+        System.out.print("nuevo apellido: ");
+        String apellido = sc.nextLine();
+
+        System.out.println("mail actual: " + usuario.getMail());
+        System.out.print("nuevo mail: ");
+        String mail = sc.nextLine();
+
+        System.out.println("celular actual: " + usuario.getCelular());
+        System.out.print("nuevo celular: ");
+        String celular = sc.nextLine();
+
+        System.out.print("nueva contrasena: ");
+        String contrasena = sc.nextLine();
+
+        // si los campos no estan vacios los actualizo, sino mantiene el valor
+        if (!nombre.isBlank()) {
+            usuario.setNombre(nombre);
+        }
+
+        if (!apellido.isBlank()) {
+            usuario.setApellido(apellido);
+        }
+
+        if (!mail.isBlank()) {
+
+            // busco si el nuevo mail ya esta usado por otro usuario
+            Optional<Usuario> usuarioConMail = usuarioRepo.buscarPorMail(mail);
+
+            if (usuarioConMail.isPresent() && !usuarioConMail.get().getId().equals(usuario.getId())) {
+                System.out.println("ya existe otro usuario activo con ese mail");
+                return;
+            }
+
+            usuario.setMail(mail);
+        }
+
+        if (!celular.isBlank()) {
+            usuario.setCelular(celular);
+        }
+
+        if (!contrasena.isBlank()) {
+            usuario.setContrasena(contrasena);
+        }
+
+        usuarioRepo.guardar(usuario); // commit
+
+        System.out.println("usuario modificado correctamente");
     }
 
     private static void bajaUsuario() {
-        System.out.println("[baja usuario] pendiente");
+
+        System.out.println("usuarios disponibles para dar de baja: ");
+        listarUsuarios();
+
+        System.out.print("id de usuario a suspender: ");
+        Long id = leerLong();
+
+        // busco por id
+        Usuario usuario = usuarioRepo.buscarPorId(id).orElse(null);
+
+        // valido que exista y no este eliminado
+        if (usuario == null || usuario.isEliminado()) {
+            System.out.println("no existe un usuario activo con ese id");
+            return;
+        }
+
+        // uso el boolean de eliminar para saber si se pudo dar de baja
+        boolean eliminado = usuarioRepo.eliminarLogico(id);
+
+        if (eliminado) {
+            System.out.println("usuario " + usuario.getNombre() + " "
+                    + usuario.getApellido() + ", id: "
+                    + usuario.getId() + " dado de baja");
+        } else {
+            System.out.println("no se pudo dar de baja el usuario");
+        }
     }
 
     private static void listarUsuarios() {
-        System.out.println("[listar usuarios] pendiente");
+
+        List<Usuario> usuarios = usuarioRepo.listarActivos();
+
+        if (usuarios.isEmpty()) {
+            System.out.println("no hay usuarios activos");
+            return;
+        }
+
+        for (Usuario usuario : usuarios) {
+            System.out.println(
+                    usuario.getId()
+                            + " - "
+                            + usuario.getNombre()
+                            + " "
+                            + usuario.getApellido()
+                            + " - mail: "
+                            + usuario.getMail()
+                            + " - rol: "
+                            + usuario.getRol()
+            );
+        }
     }
 
     private static void buscarUsuarioPorMail() {
-        System.out.println("[buscar usuario por mail] pendiente");
+
+        System.out.print("mail del usuario a buscar: ");
+        String mail = sc.nextLine();
+
+        if (mail.isBlank()) {
+            System.out.println("el mail no puede estar vacio");
+            return;
+        }
+
+        // busco usuario  por mail
+        Optional<Usuario> usuarioBusco = usuarioRepo.buscarPorMail(mail);
+
+        // valido si no encontro nada
+        if (usuarioBusco.isEmpty()) {
+            System.out.println("no existe usuario activo con ese mail");
+            return;
+        }
+
+        Usuario usuario = usuarioBusco.get(); // si pasa el if agarro el usuario del Optional y lo guardo
+
+        // muestro los datos
+        System.out.println("id: " + usuario.getId());
+        System.out.println("nombre: " + usuario.getNombre());
+        System.out.println("apellido: " + usuario.getApellido());
+        System.out.println("mail: " + usuario.getMail());
+        System.out.println("celular: " + usuario.getCelular());
+        System.out.println("rol: " + usuario.getRol());
     }
 
 // ── pedidos ─────────────────────────────────────────────────
