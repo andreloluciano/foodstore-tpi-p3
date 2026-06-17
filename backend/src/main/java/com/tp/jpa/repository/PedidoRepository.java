@@ -3,8 +3,10 @@ package com.tp.jpa.repository;
 import com.tp.jpa.model.Pedido;
 import com.tp.jpa.model.enums.Estado;
 import jakarta.persistence.EntityManager;
-
 import java.util.List;
+import com.tp.jpa.model.Producto;
+import com.tp.jpa.model.Usuario;
+import com.tp.jpa.model.enums.FormaPago;
 
 /**
  * Repositorio de Pedido. Además del CRUD heredado implementa consultas por
@@ -47,10 +49,96 @@ public class PedidoRepository extends BaseRepository<Pedido> {
             em.close();
         }
     }
-}
+
 
 // la primer query selecciona pedidos desde usuario, usando el set pedidos
 // filtra por id de usuario y eliminado = false
-
 // la segunda query selecciona pedidos activos que tengan el estado recibido
 // sirve para ver pendientes, confirmados, terminados o cancelados
+
+    public Pedido guardarPedido(Long idUsuario, FormaPago formaPago,
+                                List<Long> idsProductos,
+                                List<Integer> cantidades) {
+        EntityManager em = emf.createEntityManager();
+
+        try {
+            em.getTransaction().begin();
+
+            // busco el usuario dentro de la transaccion
+            Usuario usuario = em.find(Usuario.class, idUsuario);
+
+            if (usuario == null || usuario.isEliminado()) {
+                em.getTransaction().rollback();
+                return null;
+            }
+
+            // valido que las listas coincidan
+            if (idsProductos.size() != cantidades.size()) {
+                em.getTransaction().rollback();
+                return null;
+            }
+
+            // creo el pedido
+            Pedido pedido = Pedido.builder()
+                    .estado(Estado.PENDIENTE)
+                    .formaPago(formaPago)
+                    .total(0.0)
+                    .build();
+
+            // recorro los productos elegidos
+            for (int i = 0; i < idsProductos.size(); i++) {
+
+                Long idProducto = idsProductos.get(i);
+                int cantidad = cantidades.get(i);
+
+                Producto producto = em.find(Producto.class, idProducto);
+
+                if (producto == null || producto.isEliminado()) {
+                    em.getTransaction().rollback();
+                    return null;
+                }
+
+                if (!Boolean.TRUE.equals(producto.getDisponible())) {
+                    em.getTransaction().rollback();
+                    return null;
+                }
+
+                if (producto.getStock() < cantidad) {
+                    em.getTransaction().rollback();
+                    return null;
+                }
+
+                // pedido crea el detalle y calcula subtotal
+                pedido.addDetallePedido(cantidad, producto);
+
+                // descuento stock
+                producto.setStock(producto.getStock() - cantidad);
+            }
+
+            // calculo total del pedido
+            pedido.calcularTotal();
+
+            // usuario tiene la relacion con pedidos
+            usuario.addPedido(pedido);
+
+            // por cascade se guarda pedido y detalles
+            em.merge(usuario);
+
+            em.getTransaction().commit();
+
+            return pedido;
+
+        } catch (RuntimeException e) {
+            if (em.getTransaction().isActive()) {
+                em.getTransaction().rollback();
+            }
+
+            System.out.println("error al guardar pedido: " + e.getMessage());
+            return null;
+
+        } finally {
+            em.close();
+        }
+    }
+
+}

@@ -1,8 +1,12 @@
 package com.tp.jpa;
 
+import java.util.ArrayList;
 import java.util.logging.LogManager;
 import java.util.logging.Logger;
 import java.util.logging.Level;
+
+import com.tp.jpa.model.Pedido;
+import com.tp.jpa.model.enums.FormaPago;
 import com.tp.jpa.repository.CategoriaRepository;
 import com.tp.jpa.repository.PedidoRepository;
 import com.tp.jpa.repository.ProductoRepository;
@@ -599,7 +603,7 @@ public class Main {
 
     private static void altaUsuario() {
 
-        // solicito nombre
+        // solicito datos
         System.out.print("nombre: ");
         String nombre = sc.nextLine();
 
@@ -608,7 +612,7 @@ public class Main {
             return;
         }
 
-        // solicito apellido
+
         System.out.print("apellido: ");
         String apellido = sc.nextLine();
 
@@ -617,7 +621,6 @@ public class Main {
             return;
         }
 
-        // solicito mail
         System.out.print("mail: ");
         String mail = sc.nextLine();
 
@@ -634,7 +637,6 @@ public class Main {
             return;
         }
 
-        // solicito celular
         System.out.print("celular: ");
         String celular = sc.nextLine();
 
@@ -648,7 +650,7 @@ public class Main {
         }
 
         // seleccion de rol
-        System.out.println("rol: ");
+        System.out.println("seleccione el rol: ");
         System.out.println("1. admin");
         System.out.println("2. usuario");
         System.out.print("opcion: ");
@@ -827,7 +829,6 @@ public class Main {
 
         Usuario usuario = usuarioBusco.get(); // si pasa el if agarro el usuario del Optional y lo guardo
 
-        // muestro los datos
         System.out.println("id: " + usuario.getId());
         System.out.println("nombre: " + usuario.getNombre());
         System.out.println("apellido: " + usuario.getApellido());
@@ -839,7 +840,100 @@ public class Main {
 // ── pedidos ─────────────────────────────────────────────────
 
     private static void altaPedido() {
-        System.out.println("[alta pedido] pendiente");
+
+        // valido que haya usuarios
+        List<Usuario> usuarios = usuarioRepo.listarActivos();
+
+        if (usuarios.isEmpty()) {
+            System.out.println("no hay usuarios activos");
+            return;
+        }
+
+        System.out.println("usuarios disponibles: ");
+        listarUsuarios();
+
+        System.out.print("id de usuario: ");
+        Long idUsuario = leerLong();
+
+        Usuario usuario = usuarioRepo.buscarPorId(idUsuario).orElse(null);
+
+        if (usuario == null || usuario.isEliminado()) {
+            System.out.println("no existe un usuario activo con ese id");
+            return;
+        }
+
+        // selecciono forma de pago
+        FormaPago formaPago = elegirFormaPago();
+
+        if (formaPago == null) {
+            System.out.println("forma de pago invalida");
+            return;
+        }
+
+        // listas temporales
+        List<Long> idsProductos = new ArrayList<>();
+        List<Integer> cantidades = new ArrayList<>();
+
+        String seguir = "s";
+
+        while (seguir.equalsIgnoreCase("s")) {
+
+            System.out.println("productos disponibles: ");
+            listarProductos();
+
+            System.out.print("id de producto: ");
+            Long idProducto = leerLong();
+
+            Producto producto = productoRepo.buscarPorId(idProducto).orElse(null);
+
+            if (producto == null || producto.isEliminado()) {
+                System.out.println("no existe un producto activo con ese id");
+                return; // usar continue ?? return corta el run
+            }
+
+            if (!Boolean.TRUE.equals(producto.getDisponible())) {
+                System.out.println("el producto no esta disponible");
+                return; // usar continue ?? return corta el run
+            }
+
+            System.out.print("cantidad: ");
+            int cantidad = leerEntero();
+
+            if (cantidad <= 0) {
+                System.out.println("la cantidad debe ser mayor a 0");
+                return; // usar continue ?? return corta el run
+            }
+
+            if (producto.getStock() < cantidad) {
+                System.out.println("stock insuficiente, stock disponible: " + producto.getStock());
+                return;
+            }
+
+            // guardo el id y la cantidad en la misma posicion
+            idsProductos.add(idProducto);
+            cantidades.add(cantidad);
+
+            System.out.print("agregar otro producto s/n: ");
+            seguir = sc.nextLine();
+        }
+
+        if (idsProductos.isEmpty()) {
+            System.out.println("el pedido debe tener al menos un producto");
+            return;
+        }
+
+        // aca recien se guarda todo junto
+        Pedido pedidoGuardado = pedidoRepo.guardarPedido(idUsuario, formaPago, idsProductos, cantidades);
+
+        if (pedidoGuardado == null) {
+            System.out.println("no se pudo crear el pedido");
+            return;
+        }
+
+        System.out.println("pedido creado con id: " + pedidoGuardado.getId());
+        System.out.println("usuario: " + usuario.getNombre() + " " + usuario.getApellido());
+        System.out.println("forma de pago: " + formaPago);
+        System.out.println("total: " + pedidoGuardado.getTotal());
     }
 
     private static void cambiarEstadoPedido() {
@@ -868,7 +962,7 @@ public class Main {
         System.out.println("[total facturado] pendiente");
     }
 
-// ── lecturas ─────────────────────────────────────────────────
+// ── lecturas ── helpers ─────────────────────────────────────────────────
 
     private static int leerEntero() {
         int valor = sc.nextInt();
@@ -886,6 +980,24 @@ public class Main {
         Double valor = sc.nextDouble();
         sc.nextLine();
         return valor;
+    }
+
+    private static FormaPago elegirFormaPago() {
+
+        System.out.println("formas de pago disponibles: ");
+        System.out.println("1. tarjeta");
+        System.out.println("2. transferencia");
+        System.out.println("3. efectivo");
+        System.out.print("opcion: ");
+
+        int opcion = leerEntero();
+
+        switch (opcion) {
+            case 1: return FormaPago.TARJETA;
+            case 2: return FormaPago.TRANSFERENCIA;
+            case 3: return FormaPago.EFECTIVO;
+            default: return null;
+        }
     }
 
 }
