@@ -1,3 +1,14 @@
+# 💻 Programación 3
+**Tecnicatura Universitaria en Programación**  
+📍 *Universidad Tecnológica Nacional*  
+
+## ✨ Estudiante  
+- **Nombre:** Luciano Aldo Andrelo   
+- **Comisión:** M2025-18  
+
+## 📂 Descripción del Repositorio  
+Este repositorio almacena el Trabajo Practico Integrador de **Programación 3**.  
+
 # Food Store JPA — Plantilla TPI (Parte 2)
 
 Este README corresponde a la plantilla base para el desarrollo del TPI — Parte 2 (Backend JPA + Consola).
