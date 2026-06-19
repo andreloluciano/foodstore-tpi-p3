@@ -6,6 +6,7 @@ import java.util.logging.Logger;
 import java.util.logging.Level;
 
 import com.tp.jpa.model.Pedido;
+import com.tp.jpa.model.enums.Estado;
 import com.tp.jpa.model.enums.FormaPago;
 import com.tp.jpa.repository.CategoriaRepository;
 import com.tp.jpa.repository.PedidoRepository;
@@ -922,7 +923,7 @@ public class Main {
             return;
         }
 
-        // aca recien se guarda todo junto
+        // finalmente guardo
         Pedido pedidoGuardado = pedidoRepo.guardarPedido(idUsuario, formaPago, idsProductos, cantidades);
 
         if (pedidoGuardado == null) {
@@ -937,29 +938,182 @@ public class Main {
     }
 
     private static void cambiarEstadoPedido() {
-        System.out.println("[cambiar estado pedido] pendiente");
+
+        System.out.println("pedidos disponibles: ");
+        listarPedidos();
+
+        System.out.print("id de pedido: ");
+        Long id = leerLong();
+
+        Pedido pedido = pedidoRepo.buscarPorId(id).orElse(null);
+
+        // valido que exista
+        if (pedido == null || pedido.isEliminado()) {
+            System.out.println("no existe un pedido activo con ese id");
+            return;
+        }
+
+        System.out.println("estado actual: " + pedido.getEstado());
+
+        // selecciono nuevo estado
+        Estado estado = elegirEstado();
+
+        if (estado == null) {
+            System.out.println("estado invalido");
+            return;
+        }
+
+        pedido.setEstado(estado);   // actualizo el estado del pedido
+        pedidoRepo.guardar(pedido);   // guardo el pedido modificado
+
+        System.out.println("pedido " + pedido.getId()
+                + " actualizado a estado: " + estado);
     }
 
     private static void bajaPedido() {
-        System.out.println("[baja pedido] pendiente");
+
+        System.out.println("pedidos disponibles para eliminar: ");
+        listarPedidos();
+
+        System.out.print("id de pedido a eliminar: ");
+        Long id = leerLong();
+
+        Pedido pedido = pedidoRepo.buscarPorId(id).orElse(null);
+
+        // valido que exista
+        if (pedido == null || pedido.isEliminado()) {
+            System.out.println("no existe un pedido activo con ese id");
+            return;
+        }
+
+        boolean eliminado = pedidoRepo.eliminarLogico(id); // eliminado a true
+
+        if (eliminado) {
+            System.out.println("pedido " + pedido.getId()
+                    + " eliminado, total: " + pedido.getTotal());
+        } else {
+            System.out.println("no se pudo eliminar el pedido");
+        }
     }
 
     private static void listarPedidos() {
-        System.out.println("[listar pedidos] pendiente");
+
+        List<Pedido> pedidos = pedidoRepo.listarPedidosActivos();
+
+         /*
+    List<Pedido> pedidosOrdenados = pedidos.stream()
+            .sorted((p1, p2) -> p2.getFecha().compareTo(p1.getFecha()))
+            .toList();
+    */
+
+        if (pedidos.isEmpty()) {
+            System.out.println("no hay pedidos activos");
+            return;
+        }
+
+        for (Pedido pedido : pedidos) {
+
+            // busco el nombre del usuario
+            String nombreUsuario = pedidoRepo.buscarUsuario(pedido.getId());
+
+            System.out.println(pedido.getId()
+                            + " - fecha: " + pedido.getFecha()
+                            + " - estado: " + pedido.getEstado()
+                            + " - pago: " + pedido.getFormaPago()
+                            + " - usuario: " + nombreUsuario
+                            + " - total: " + pedido.getTotal()
+            );
+        }
     }
 
     private static void pedidosPorUsuario() {
-        System.out.println("[pedidos por usuario] pendiente");
+
+        List<Usuario> usuarios = usuarioRepo.listarActivos(); // lo mismo que altaPedido
+
+        if (usuarios.isEmpty()) {
+            System.out.println("no hay usuarios activos");
+            return;
+        }
+
+        System.out.println("usuarios disponibles: ");
+        listarUsuarios();
+
+        System.out.print("id de usuario: ");
+        Long idUsuario = leerLong();
+
+        // busco y valido el usuario elegido
+        Usuario usuario = usuarioRepo.buscarPorId(idUsuario).orElse(null);
+
+        if (usuario == null || usuario.isEliminado()) {
+            System.out.println("no existe un usuario activo con ese id");
+            return;
+        }
+
+        // busco los pedidos activos del usuario
+        List<Pedido> pedidos = pedidoRepo.buscarPorUsuario(idUsuario);
+
+        if (pedidos.isEmpty()) {
+            System.out.println("el usuario no tiene pedidos activos");
+            return;
+        }
+
+        System.out.println("pedidos de usuario: " + usuario.getNombre() + " " + usuario.getApellido());
+
+        for (Pedido pedido : pedidos) {
+            System.out.println(pedido.getId()
+                            + " - fecha: " + pedido.getFecha()
+                            + " - estado: " + pedido.getEstado()
+                            + " - pago: " + pedido.getFormaPago()
+                            + " - total: " + pedido.getTotal()
+            );
+        }
     }
 
     private static void pedidosPorEstado() {
-        System.out.println("[pedidos por estado] pendiente");
+
+        // selecciono el estado a consultar
+        Estado estado = elegirEstado();
+
+        if (estado == null) {
+            System.out.println("estado invalido");
+            return;
+        }
+
+        // busco pedidos activos
+        List<Pedido> pedidos = pedidoRepo.buscarPorEstado(estado);
+
+        if (pedidos.isEmpty()) {
+            System.out.println("no hay pedidos con ese estado");
+            return;
+        }
+
+        System.out.println("pedidos con estado: " + estado);
+
+        for (Pedido pedido : pedidos) {
+
+            // busco el nombre del usuario porque pedido no tiene usuario
+            String nombreUsuario = pedidoRepo.buscarUsuario(pedido.getId());
+
+            System.out.println(pedido.getId()
+                            + " - fecha: " + pedido.getFecha()
+                            + " - usuario: " + nombreUsuario
+                            + " - total: " + pedido.getTotal()
+            );
+        }
     }
 
 // ── reportes ─────────────────────────────────────────────────
 
     private static void totalFacturado() {
-        System.out.println("[total facturado] pendiente");
+
+        // busco los pedidos terminados
+        List<Pedido> pedidos = pedidoRepo.buscarPorEstado(Estado.TERMINADO);
+
+        double total = pedidos.stream()
+                .mapToDouble(pedido -> pedido.getTotal() != null ? pedido.getTotal() : 0)
+                .sum();  // si el total del pedido es null usa 0
+
+        System.out.println("total facturado: $" + total);
     }
 
 // ── lecturas ── helpers ─────────────────────────────────────────────────
@@ -983,7 +1137,6 @@ public class Main {
     }
 
     private static FormaPago elegirFormaPago() {
-
         System.out.println("formas de pago disponibles: ");
         System.out.println("1. tarjeta");
         System.out.println("2. transferencia");
@@ -992,12 +1145,31 @@ public class Main {
 
         int opcion = leerEntero();
 
-        switch (opcion) {
-            case 1: return FormaPago.TARJETA;
-            case 2: return FormaPago.TRANSFERENCIA;
-            case 3: return FormaPago.EFECTIVO;
-            default: return null;
-        }
+        return switch (opcion) {
+            case 1 -> FormaPago.TARJETA;
+            case 2 -> FormaPago.TRANSFERENCIA;
+            case 3 -> FormaPago.EFECTIVO;
+            default -> null;
+        };
+    }
+
+    private static Estado elegirEstado() {
+        System.out.println("estados disponibles: ");
+        System.out.println("1. pendiente");
+        System.out.println("2. confirmado");
+        System.out.println("3. terminado");
+        System.out.println("4. cancelado");
+        System.out.print("opcion: ");
+
+        int opcion = leerEntero();
+
+        return switch (opcion) {
+            case 1 -> Estado.PENDIENTE;
+            case 2 -> Estado.CONFIRMADO;
+            case 3 -> Estado.TERMINADO;
+            case 4 -> Estado.CANCELADO;
+            default -> null;
+        };
     }
 
 }

@@ -118,11 +118,11 @@ public class PedidoRepository extends BaseRepository<Pedido> {
             // calculo total del pedido
             pedido.calcularTotal();
 
+            // guardo el pedido para que tenga id, cambie merge por persist
+            em.persist(pedido);
+
             // usuario tiene la relacion con pedidos
             usuario.addPedido(pedido);
-
-            // por cascade se guarda pedido y detalles
-            em.merge(usuario);
 
             em.getTransaction().commit();
 
@@ -141,4 +141,36 @@ public class PedidoRepository extends BaseRepository<Pedido> {
         }
     }
 
+    public List<Pedido> listarPedidosActivos() {
+        EntityManager em = emf.createEntityManager();
+        try {
+            return em.createQuery( //JPQL: devuelvo todos los pedidos activos ordenados por fecha (DESC)
+                            "SELECT p FROM Pedido p WHERE p.eliminado = false ORDER BY p.fecha DESC",
+                            Pedido.class)
+                    .getResultList();
+        } finally {
+            em.close();
+        }
+    }
+
+    public String buscarUsuario(Long idPedido) {
+        EntityManager em = emf.createEntityManager();
+
+        try {
+            List<Usuario> usuarios = em.createQuery( // busca el usuario del pedido recibido
+                            "SELECT u FROM Usuario u JOIN u.pedidos p WHERE p.id = :idPedido",
+                            Usuario.class)
+                    .setParameter("idPedido", idPedido) // parametro
+                    .getResultList();
+
+            if (usuarios.isEmpty()) {
+                return "sin usuario";
+            }
+            Usuario usuario = usuarios.getFirst(); // tomo el primer resultado y muestro datos
+
+            return usuario.getNombre() + " " + usuario.getApellido();
+        } finally {
+            em.close();
+        }
+    }
 }

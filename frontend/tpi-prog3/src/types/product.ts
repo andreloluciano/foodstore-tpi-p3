@@ -1,19 +1,16 @@
-// src/types/product.ts
-import type { ICategory } from "./category";
+import type { Category } from "./category";
 
 export interface Product {
   id: number;
-  eliminado: boolean;
-  createdAt: string;
   nombre: string;
   precio: number;
   descripcion: string;
   stock: number;
   imagen: string;
   disponible: boolean;
-  categorias: ICategory[]; 
+  categoria: Category;
+  eliminado?: boolean;
 }
-
 
 export interface CartItem extends Product {
   quantity: number;
