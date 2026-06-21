@@ -40,11 +40,18 @@ const renderCarrito = () => {
   carrito.forEach((producto: CartItem) => { // recorremos carrito // producto: Product ?? preguntar
     const div = document.createElement("div")as HTMLDivElement; // creo un bloque html
 
-    div.innerHTML = ` 
-      <h3>${producto.nombre}</h3>
-      <p>Precio: $${producto.precio}</p>
-      <p>Subtotal: $${producto.precio * producto.quantity}</p> 
-    `; // inserto y muestro contenido en el bloque div  // subtotal
+div.classList.add("cart-item");
+
+div.innerHTML = ` 
+  <img src="${producto.imagen}" alt="${producto.nombre}" class="cart-imagen">
+
+  <div class="cart-info">
+    <h3>${producto.nombre}</h3>
+    <p>${producto.descripcion}</p>
+    <p>Precio: $${producto.precio}</p>
+    <p>Subtotal: $${producto.precio * producto.quantity}</p> 
+  </div>
+`; // inserto y muestro contenido en el bloque div  // subtotal
 
     // funcion para aumentar cantidad
 const aumentarCantidad = (id: number) => { // recibe el id del producto
@@ -53,9 +60,14 @@ const aumentarCantidad = (id: number) => { // recibe el id del producto
 
   const producto = carrito.find((item: CartItem) => item.id === id); // busca producto que coincida con ese id
 
-  if (producto) { 
-    producto.quantity += 1; // si existe cambio cantidad 
+ if (producto) { 
+  if (producto.quantity >= producto.stock) {
+    alert("No hay mas stock disponible");
+    return;
   }
+
+  producto.quantity += 1; // si existe cambio cantidad 
+}
 
   localStorage.setItem("cart", JSON.stringify(carrito)); // guardo carrito actualizado
 
@@ -102,12 +114,6 @@ const disminuirCantidad = (id: number) => {
       aumentarCantidad(producto.id);
     });
 
-    // muestro los botones en el div
-    div.appendChild(botonMenos);
-    div.appendChild(cantidadTexto);
-    div.appendChild(botonMas);
-
-
     // boton eliminar P2
     const button = document.createElement("button"); // creo boton
     button.textContent = "Eliminar"; 
@@ -117,7 +123,15 @@ const disminuirCantidad = (id: number) => {
       eliminarProducto(producto.id);
     });
 
-    div.appendChild(button); // agrego el boton al div
+        const acciones = document.createElement("div");
+    acciones.classList.add("cart-acciones");
+ // muestro los botones en el div
+    acciones.appendChild(botonMenos);
+    acciones.appendChild(cantidadTexto);
+    acciones.appendChild(botonMas);
+    acciones.appendChild(button);
+
+    div.appendChild(acciones); // agrego el boton al div
 
     // suma del total
     total += producto.precio * producto.quantity;
