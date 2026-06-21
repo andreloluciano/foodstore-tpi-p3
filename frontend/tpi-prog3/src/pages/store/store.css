@@ -139,3 +139,47 @@ footer {
   background-color: var(--color-blanco);
   border-top: 1px solid var(--color-borde);
 }
+
+.producto-imagen {
+  width: 160px;
+  height: 120px;
+  object-fit: cover;
+  border-radius: 8px;
+  margin-bottom: 10px;
+}
+
+.badge-disponible {
+  display: inline-block;
+  margin-top: 8px;
+  padding: 5px 10px;
+  border-radius: 12px;
+  background-color: #d4f8d4;
+  color: #1f7a1f;
+  font-weight: bold;
+  font-size: 14px;
+}
+
+.badge-no-disponible {
+  display: inline-block;
+  margin-top: 8px;
+  padding: 5px 10px;
+  border-radius: 12px;
+  background-color: #ffd6d6;
+  color: #a10000;
+  font-weight: bold;
+  font-size: 14px;
+}
+
+.boton-no-disponible {
+  background-color: #999;
+  cursor: not-allowed;
+}
+
+.link-detalle {
+  color: #ff5a49;
+  text-decoration: none;
+}
+
+.link-detalle:hover {
+  text-decoration: underline;
+}

@@ -6,6 +6,7 @@ import { checkAuhtUser } from "../../../utils/auth";
 const inputBuscar = document.getElementById("buscar") as HTMLInputElement;
 const contenedor = document.getElementById("contenedor-productos") as HTMLDivElement; // contenedor
 const listaCategorias = document.getElementById("lista-categorias") as HTMLUListElement; //importo categorias
+const contadorProductos = document.getElementById("contador-productos") as HTMLParagraphElement; // contador de productos
 checkAuhtUser(
   "/src/pages/auth/login/login.html",
   "/src/pages/admin/home/home.html",
@@ -38,6 +39,7 @@ const agregarAlCarrito = (producto: Product) => {
 // funcion render, recorre los productos y los mete dentr odel contenedor
 const renderProductos = (productos: Product[]) => { 
   contenedor.innerHTML = ""; // limpia antes de renderizar
+  contadorProductos.textContent = `Productos encontrados: ${productos.length}`; // contador
 
   // si no hay productos para mostrar muestro mensaje
   if (productos.length === 0) {
@@ -48,21 +50,38 @@ const renderProductos = (productos: Product[]) => {
     return; // corto la funcion
   }
 
-  productos.forEach((producto) => {
+  productos.forEach((producto) => { // cambio el producto.nombre para que sea un link a su detalle
     const card = document.createElement("div"); // creo contenedor para cada producto
     card.innerHTML = `
-      <h3>${producto.nombre}</h3>
+     <img src="${producto.imagen}" alt="${producto.nombre}" class="producto-imagen"> 
+      <h3>
+  <a href="/src/pages/store/productDetail/productDetail.html?id=${producto.id}" class="link-detalle">
+    ${producto.nombre}
+  </a>
+</h3>
       <p>${producto.descripcion}</p>
       <p>Precio: $${producto.precio}</p>
+       <span class="${producto.disponible ? "badge-disponible" : "badge-no-disponible"}"> 
+    ${producto.disponible ? "Disponible" : "No disponible"}
+  </span>
     `;
 
-    // boton para agregar el producto
-    const button = document.createElement("button");
-    button.textContent = "Agregar al carrito";
+    
 
-    button.addEventListener("click", () => {
-      agregarAlCarrito(producto); // con click llamo a la funcion 
-    });
+    // boton para agregar el producto
+const button = document.createElement("button");
+
+if (producto.disponible) { // chequeo si el producto está disponible, sino bloqueo el boton
+  button.textContent = "Agregar al carrito";
+
+  button.addEventListener("click", () => {
+    agregarAlCarrito(producto); // con click llamo a la funcion 
+  });
+} else {
+  button.textContent = "No disponible";
+  button.disabled = true;
+  button.classList.add("boton-no-disponible");
+}
 
     card.appendChild(button); // agrego el boton a la card
 
