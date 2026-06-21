@@ -11,7 +11,7 @@ buttonLogout?.addEventListener("click", () => {
 const initPage = () => {
   checkAuhtUser(
     "/src/pages/auth/login/login.html",
-    "/src/pages/client/home/home.html",
+    "/src/pages/store/home/home.html",
     "ADMIN"
   );
 };

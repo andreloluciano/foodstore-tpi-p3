@@ -7,13 +7,13 @@ export const checkAuhtUser = (
   redireccion1: string,
   redireccion2: string,
   rol: Rol
-) => {
+): boolean => {
   const user = getUSer();
 
   if (!user) {
     alert("Debes iniciar sesion primero");
     navigate(redireccion1);
-    return;
+    return false;
   }
 
   const parseUser: IUser = JSON.parse(user);
@@ -21,8 +21,10 @@ export const checkAuhtUser = (
   if (parseUser.rol !== rol) {
     alert("No tenes permisos para acceder a esta seccion");
     navigate(redireccion2);
-    return;
+    return false;
   }
+
+  return true;
 };
 
 export const logout = () => {

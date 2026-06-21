@@ -1,32 +1,56 @@
-// Capturamos el formulario
-const form = document.getElementById("registroForm") as HTMLFormElement;
+import type { IUser } from "../../../types/IUser";
+import { getUsuarios } from "../../../utils/api";
 
-// Evento para el submit
-form.addEventListener("submit", (e) => {
+const form = document.getElementById("registroForm") as HTMLFormElement;
+const inputEmail = document.getElementById("email") as HTMLInputElement;
+const inputPassword = document.getElementById("password") as HTMLInputElement;
+
+form.addEventListener("submit", async (e) => {
   e.preventDefault();
 
-  // Capturamos los valores
-  const emailInput = document.getElementById("email") as HTMLInputElement;
-  const passwordInput = document.getElementById("password") as HTMLInputElement;
+  const email = inputEmail.value.trim();
+  const password = inputPassword.value.trim();
 
-  const email = emailInput.value;
-  const password = passwordInput.value;
+  // valido campos vacios
+  if (!email || !password) {
+    alert("Completa todos los campos");
+    return;
+  }
 
-  // crear  usuario
-  const newUser = {
-    email: email,
+  const usuariosJson = await getUsuarios(); // traigo usuarios desde el json
+
+  // traigo usuarios registrados en localstorage
+  const usuariosRegistrados: IUser[] = JSON.parse(
+    localStorage.getItem("usuariosRegistrados") || "[]"
+  );
+
+  const usuarios = [...usuariosJson, ...usuariosRegistrados]; // junto usuarios del json y localstorage
+
+  // valido si ya existe el mail
+  const existe = usuarios.some((user) => user.mail === email);
+
+  if (existe) {
+    alert("Ya existe un usuario con ese mail");
+    return;
+  }
+
+  // creo el usuario nuevo con rol usuario
+  const nuevoUsuario: IUser = {
+    id: usuarios.length + 1,
+    nombre: "Usuario",
+    apellido: "Nuevo",
+    mail: email,
+    celular: "",
+    rol: "USUARIO",
     password: password,
-    role: "client" // 
   };
 
-  // buscamos usuarios existentes 
-  const users = JSON.parse(localStorage.getItem("users") || "[]");
+  usuariosRegistrados.push(nuevoUsuario); // agrego el usuario nuevo
 
-  // pusheamos usuario
-  users.push(newUser);
-
-  // guardamos en localStorage
-  localStorage.setItem("users", JSON.stringify(users));
+  localStorage.setItem(
+    "usuariosRegistrados",
+    JSON.stringify(usuariosRegistrados)
+  ); // guardo usuarios registrados
 
   alert("Usuario registrado correctamente");
 

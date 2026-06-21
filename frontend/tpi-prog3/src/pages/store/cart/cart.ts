@@ -1,5 +1,11 @@
-// Video: https://youtu.be/n5tPi3F0ljI
+
+import { checkAuhtUser } from "../../../utils/auth";
 import type { CartItem } from "../../../types/product";
+checkAuhtUser(
+  "/src/pages/auth/login/login.html",
+  "/src/pages/admin/home/home.html",
+  "USUARIO"
+);
 const contenedor = document.getElementById("cart-container") as HTMLDivElement;
 const clearCartButton = document.getElementById("clearCart") as HTMLButtonElement;
 

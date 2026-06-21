@@ -1,10 +1,20 @@
-// Video: https://youtu.be/n5tPi3F0ljI
-import { PRODUCTS, getCategories } from "../../../data/data";
+
+import { getProductos, getCategorias } from "../../../utils/api";
 import type { Product, CartItem } from "../../../types/product";
+import type { Category } from "../../../types/category";
+import { checkAuhtUser } from "../../../utils/auth";
 const inputBuscar = document.getElementById("buscar") as HTMLInputElement;
 const contenedor = document.getElementById("contenedor-productos") as HTMLDivElement; // contenedor
 const listaCategorias = document.getElementById("lista-categorias") as HTMLUListElement; //importo categorias
+checkAuhtUser(
+  "/src/pages/auth/login/login.html",
+  "/src/pages/admin/home/home.html",
+  "USUARIO"
+);
 
+
+let productos: Product[] = [];
+let categorias: Category[] = [];
 
 // funcion para agregar productos al carrito
 const agregarAlCarrito = (producto: Product) => { 
@@ -26,17 +36,17 @@ const agregarAlCarrito = (producto: Product) => {
 };
 
 // funcion render, recorre los productos y los mete dentr odel contenedor
-const renderProductos = (productos: typeof PRODUCTS) => { 
+const renderProductos = (productos: Product[]) => { 
   contenedor.innerHTML = ""; // limpia antes de renderizar
 
   // si no hay productos para mostrar muestro mensaje
-if (productos.length === 0) {
-  const mensaje = document.createElement("p"); // creo un <p>
-  mensaje.textContent = "No se encontraron productos"; // aplico texto al <p>
+  if (productos.length === 0) {
+    const mensaje = document.createElement("p"); // creo un <p>
+    mensaje.textContent = "No se encontraron productos"; // aplico texto al <p>
 
-  contenedor.appendChild(mensaje);
-  return; // corto la funcion
-}
+    contenedor.appendChild(mensaje);
+    return; // corto la funcion
+  }
 
   productos.forEach((producto) => {
     const card = document.createElement("div"); // creo contenedor para cada producto
@@ -48,13 +58,13 @@ if (productos.length === 0) {
 
     // boton para agregar el producto
     const button = document.createElement("button");
-button.textContent = "Agregar al carrito";
+    button.textContent = "Agregar al carrito";
 
-button.addEventListener("click", () => {
-  agregarAlCarrito(producto); // con click llamo a la funcion 
-});
+    button.addEventListener("click", () => {
+      agregarAlCarrito(producto); // con click llamo a la funcion 
+    });
 
-card.appendChild(button); // agrego el boton a la card
+    card.appendChild(button); // agrego el boton a la card
 
     contenedor.appendChild(card); // meto producto(card) dentro del contenedor
   });
@@ -62,13 +72,12 @@ card.appendChild(button); // agrego el boton a la card
 
 // mostrar categorias en pantalla
 const renderCategorias = () => {
-  const categorias = getCategories(); // traigo categorias desde data.ts
   listaCategorias.innerHTML = ""; // limpio antes de renderizar
  
   const liTodos = document.createElement("li");  // opcion para mostrar todos los productos 
   liTodos.textContent = "Todos";
   liTodos.addEventListener("click", () => { // evento para mostrar Todos
-    renderProductos(PRODUCTS);
+    renderProductos(productos);
   });
 
   listaCategorias.appendChild(liTodos);
@@ -80,9 +89,9 @@ const renderCategorias = () => {
 
     // evento de click para filtrar productos por categoria
     li.addEventListener("click", () => {
-      const productosFiltrados = PRODUCTS.filter((producto) => // filtra solo con productos de esa categoria
-        producto.categorias.some((cat) => cat.nombre === categoria.nombre)
-      ); // some pregunta si el producto tiene alguna categoria con ese nombre
+      const productosFiltrados = productos.filter((producto) => // filtra solo con productos de esa categoria
+        producto.categoria.nombre === categoria.nombre
+      );
 
       renderProductos(productosFiltrados); // renderizo con productos filtrados
     });
@@ -96,7 +105,7 @@ inputBuscar.addEventListener("input", () => { // listener para cuando el usuario
 
   const texto = inputBuscar.value.toLowerCase(); // capturo texto ingresado
 
-  const productosFiltrados = PRODUCTS.filter((producto) => // filtro productos que coincidan con el texto ingresado
+  const productosFiltrados = productos.filter((producto) => // filtro productos que coincidan con el texto ingresado
     producto.nombre.toLowerCase().includes(texto)
   );
 
@@ -104,8 +113,16 @@ inputBuscar.addEventListener("input", () => { // listener para cuando el usuario
   renderProductos(productosFiltrados);
 });
 
-// render inicial
-renderProductos(PRODUCTS); 
-renderCategorias();
+// cargo productos y categorias desde los json
+const initPage = async () => {
+  productos = await getProductos();
+  categorias = await getCategorias();
+
+  // render inicial
+  renderProductos(productos); 
+  renderCategorias();
+};
+
+initPage();
 
 //console.log(contenedor) // testeo para ver productos

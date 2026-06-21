@@ -1,7 +1,7 @@
 //import { navigate } from "./utils/navigate";
 
 // Traemos la sesión
-const userData = localStorage.getItem("userData");
+/*const userData = localStorage.getItem("userData");
 
 // si no hay sesion pido log in
 if (!userData) {
@@ -17,4 +17,4 @@ if (user.role === "client" && path.includes("/admin/")) {
   location.href = "/src/pages/client/home/home.html";
 }
 
-}
+}*/

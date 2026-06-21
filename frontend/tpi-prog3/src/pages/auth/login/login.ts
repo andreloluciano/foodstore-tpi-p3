@@ -1,48 +1,50 @@
+import { getUsuarios } from "../../../utils/api";
 import type { IUser } from "../../../types/IUser";
-import { navigate } from "../../../utils/navigate";
 
-// hardcodeo admin para probar path de ingreso de admin
-if (!localStorage.getItem("users")) {
-  const admin = [
-    {
-      email: "admin@admin.com",
-      password: "1234",
-      role: "admin",
-      loggedIn: false
-    }
-  ];
-
-  localStorage.setItem("users", JSON.stringify(admin));}
-
-const form = document.getElementById("loginForm") as HTMLFormElement;
+const loginForm = document.getElementById("loginForm") as HTMLFormElement;
 const inputEmail = document.getElementById("email") as HTMLInputElement;
 const inputPassword = document.getElementById("password") as HTMLInputElement;
 
-form.addEventListener("submit", (e: SubmitEvent) => {
-  e.preventDefault();
+loginForm.addEventListener("submit", async (event) => {
+  event.preventDefault(); // evito que recargue la pagina
 
-  const email = inputEmail.value;
-  const password = inputPassword.value;
+  const email = inputEmail.value.trim(); // tomo el mail ingresado
+  const password = inputPassword.value.trim(); // tomo la contraseña ingresada
 
-  // traer usuarios registrados
-  const users: IUser[] = JSON.parse(localStorage.getItem("users") || "[]");
-
-  // busca coincidencia
-  const user = users.find((u) => u.email === email && u.password === password);
-
-  if (user) {
-    // guarda sesion
-    localStorage.setItem("userData", JSON.stringify(user));
-
-    // redirige según rol
-    if (user.role === "admin") {
-      navigate("/src/pages/admin/home/home.html");
-    } else {
-      navigate("/src/pages/client/home/home.html");
-    }
-  } else {
-    alert("Email o contraseña incorrectos");
+  // valido campos vacios
+  if (!email || !password) {
+    alert("Completa todos los campos");
+    return;
   }
 
+  const usuariosJson = await getUsuarios(); // traigo usuarios desde el json
+
+// traigo usuarios registrados en localstorage
+const usuariosRegistrados: IUser[] = JSON.parse(
+  localStorage.getItem("usuariosRegistrados") || "[]"
+);
+
+const usuarios = [...usuariosJson, ...usuariosRegistrados]; // junto usuarios del json y localstorage
+
   
+
+  // busco usuario con mail y contraseña
+  const user = usuarios.find(
+    (u) => u.mail === email && u.password === password
+  );
+
+  // si no encuentra usuario muestro error
+  if (!user) {
+    alert("Mail o contraseña incorrectos");
+    return;
+  }
+
+ localStorage.setItem("userData", JSON.stringify(user)); // guardo usuario en localStorage
+
+  // redireccion segun rol
+  if (user.rol === "ADMIN") {
+    window.location.href = "/src/pages/admin/home/home.html";
+  } else {
+    window.location.href = "/src/pages/store/home/home.html";
+  }
 });
