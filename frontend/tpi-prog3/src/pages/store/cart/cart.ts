@@ -8,10 +8,13 @@ checkAuhtUser(
 );
 const contenedor = document.getElementById("cart-container") as HTMLDivElement;
 const clearCartButton = document.getElementById("clearCart") as HTMLButtonElement;
-
+const inputTelefono = document.getElementById("telefono") as HTMLInputElement;
+const selectFormaPago = document.getElementById("formaPago") as HTMLSelectElement;
+const confirmarPedidoButton = document.getElementById("confirmarPedido") as HTMLButtonElement;
+const checkout = document.getElementById("checkout") as HTMLElement;
 // traemos el total
 const totalHTML = document.getElementById("total") as HTMLHeadingElement;
-
+const costoEnvio = 1000;
 
 // mostrar carrito P1
 // función para renderizar el carrito
@@ -24,17 +27,32 @@ const renderCarrito = () => {
   contenedor.innerHTML = "";
   let total = 0; // acumulador
 
-  if (carrito.length === 0) { // si hay carrito vacio
+if (carrito.length === 0) { // si hay carrito vacio
 
-    const mensaje = document.createElement("p");
-    mensaje.textContent = "Tu carrito está vacío";
+  const mensaje = document.createElement("p");
+  mensaje.textContent = "Tu carrito esta vacio";
 
-    contenedor.appendChild(mensaje); // aviso carrito vacio
+  const botonVolver = document.createElement("button");
+  botonVolver.textContent = "Volver a la tienda";
 
-    totalHTML.textContent = "Total: $0";
+  botonVolver.addEventListener("click", () => {
+    location.href = "/src/pages/store/home/home.html";
+  });
 
-    return; // corto la funcion
-  }
+  checkout.style.display = "none";
+
+  contenedor.appendChild(mensaje); // aviso carrito vacio
+  contenedor.appendChild(botonVolver); // muestro boton para volver
+
+  totalHTML.innerHTML = `
+    Subtotal: $0 <br>
+    Envio: $0 <br>
+    Total: $0
+  `;
+
+  return; // corto la funcion
+}
+  checkout.style.display = "block";
 
   // si hay productos
   carrito.forEach((producto: CartItem) => { // recorremos carrito // producto: Product ?? preguntar
@@ -139,8 +157,16 @@ const disminuirCantidad = (id: number) => {
     contenedor.appendChild(div);
   });
 
-  // mostramos total
-  totalHTML.textContent = "Total: $" + total;
+// mostramos resumen del pedido
+const subtotal = total;
+const envio = costoEnvio;
+const totalPedido = subtotal + envio;
+
+totalHTML.innerHTML = `
+  Subtotal: $${subtotal} <br>
+  Envio: $${envio} <br>
+  Total: $${totalPedido}
+`;
 };
 
 
@@ -161,6 +187,38 @@ const eliminarProducto = (id: number) => {
   renderCarrito();
 };
 
+  // funcion para confirmar pedido
+const confirmarPedido = () => {
+  const carrito: CartItem[] = JSON.parse(localStorage.getItem("cart") || "[]");
+
+  const telefono = inputTelefono.value.trim();
+  const formaPago = selectFormaPago.value;
+
+  // valido carrito vacio, telefono y forma de pago
+  if (carrito.length === 0) {
+    alert("No se puede confirmar un pedido vacio");
+    return;
+  }
+
+  if (!telefono) {
+    alert("Ingresa un telefono");
+    return;
+  }
+
+  if (!formaPago) {
+    alert("Selecciona una forma de pago");
+    return;
+  }
+
+  alert("Pedido confirmado correctamente");
+
+  localStorage.removeItem("cart"); // limpio carrito al confirmar
+
+  inputTelefono.value = "";
+  selectFormaPago.value = "";
+
+  renderCarrito(); // actualizo pantalla
+};
 
 // vaciar carrito
 function clearCart() {
@@ -171,8 +229,9 @@ function clearCart() {
 clearCartButton.addEventListener("click", () => {
   clearCart();
 });
-
-
+confirmarPedidoButton.addEventListener("click", () => {
+  confirmarPedido();
+});
 
 
 

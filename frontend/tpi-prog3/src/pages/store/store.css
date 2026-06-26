@@ -258,3 +258,15 @@ footer {
   align-items: center;
   gap: 8px;
 }
+
+#cart-container button {
+  margin-top: 10px;
+}
+
+#total {
+  background-color: white;
+  padding: 15px;
+  border-radius: 8px;
+  margin-top: 20px;
+  line-height: 1.8;
+}
