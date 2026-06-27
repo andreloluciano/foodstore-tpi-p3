@@ -300,3 +300,34 @@ h1 {
   display: inline-block;
   margin: 0 20px 20px;
 }
+
+.logo-link {
+  text-decoration: none;
+  color: white;
+}
+
+.logo-link h1 {
+  margin: 0;
+}
+
+.logo-link:hover {
+  opacity: 0.9;
+}
+
+#mensaje-toast {
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+  background-color: #222;
+  color: white;
+  padding: 12px 18px;
+  border-radius: 8px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s;
+  z-index: 1000;
+}
+
+#mensaje-toast.mostrar-toast {
+  opacity: 1;
+}

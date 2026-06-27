@@ -1,17 +1,33 @@
-<!doctype html>
-<html lang="es">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Gestion de pedidos</title>
-  </head>
-  <body>
-    <h1>Gestion de pedidos</h1>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gestion de pedidos</title>
+  <link rel="stylesheet" href="../admin.css">
+</head>
+<body>
+  <h1>Gestion de pedidos</h1>
 
-    <main id="contenedor-pedidos-admin"></main>
+  <nav>
+    <a href="../home/home.html">Panel admin</a>
+    <a href="../categories/categories.html">Categorias</a>
+    <a href="../products/products.html">Productos</a>
+  </nav>
 
-    <a href="../home/home.html">Volver al panel</a>
+  <main>
+    <label for="filtroEstado">Filtrar por estado:</label>
 
-    <script type="module" src="./orders.ts"></script>
-  </body>
+    <select id="filtroEstado">
+      <option value="">Todos</option>
+      <option value="PENDIENTE">Pendiente</option>
+      <option value="EN_PREPARACION">En preparacion</option>
+      <option value="ENTREGADO">Entregado</option>
+    </select>
+
+    <section id="contenedor-pedidos-admin"></section>
+  </main>
+
+  <script type="module" src="./orders.ts"></script>
+</body>
 </html>

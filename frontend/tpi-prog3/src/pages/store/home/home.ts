@@ -2,18 +2,29 @@
 import { getProductos, getCategorias } from "../../../utils/api";
 import type { Product, CartItem } from "../../../types/product";
 import type { Category } from "../../../types/category";
-import { checkAuhtUser } from "../../../utils/auth";
+import { checkAuhtUser, logout } from "../../../utils/auth";
 const inputBuscar = document.getElementById("buscar") as HTMLInputElement;
 const contenedor = document.getElementById("contenedor-productos") as HTMLDivElement; // contenedor
 const listaCategorias = document.getElementById("lista-categorias") as HTMLUListElement; //importo categorias
 const contadorProductos = document.getElementById("contador-productos") as HTMLParagraphElement; // contador de productos
 const selectOrdenar = document.getElementById("ordenar") as HTMLSelectElement;
-checkAuhtUser(
+const logoutButton = document.getElementById("logoutButton") as HTMLButtonElement;
+const mensajeToast = document.getElementById("mensaje-toast") as HTMLDivElement;
+// valido que sea usuario
+const tienePermiso = checkAuhtUser(
   "/src/pages/auth/login/login.html",
   "/src/pages/admin/home/home.html",
   "USUARIO"
 );
 
+if (!tienePermiso) {
+  throw new Error("sin permiso");
+}
+
+// cierro sesion
+logoutButton.addEventListener("click", () => {
+  logout();
+});
 
 let productos: Product[] = [];
 let categorias: Category[] = [];
@@ -28,14 +39,36 @@ const agregarAlCarrito = (producto: Product) => {
   const existe = carrito.find((item: CartItem) => item.id === producto.id);
 
   if (existe) {
+    // valido que no supere el stock
+    if (existe.quantity >= producto.stock) {
+      mostrarMensaje("No hay mas stock disponible");
+      return;
+    }
+
     existe.quantity += 1; // aumento cantidad si existe
   } else {
+    // valido si no hay stock
+    if (producto.stock <= 0) {
+      mostrarMensaje("No hay stock disponible");
+      return;
+    }
+
     carrito.push({ ...producto, quantity: 1 }); // sino, agrego con cantidad 1
   }
 
   localStorage.setItem("cart", JSON.stringify(carrito)); // guardo carrito actualizado el localSt
 
-  alert("Producto agregado al carrito"); // temporal
+  mostrarMensaje("Producto agregado al carrito"); // temporal
+};
+
+// funcion para mostrar mensaje temporal
+const mostrarMensaje = (mensaje: string) => {
+  mensajeToast.textContent = mensaje;
+  mensajeToast.classList.add("mostrar-toast");
+
+  setTimeout(() => {
+    mensajeToast.classList.remove("mostrar-toast");
+  }, 2000);
 };
 
 // funcion render, recorre los productos y los mete dentr odel contenedor
@@ -175,6 +208,8 @@ const initPage = async () => {
   renderProductos(productos); 
   renderCategorias();
 };
+
+
 
 initPage();
 

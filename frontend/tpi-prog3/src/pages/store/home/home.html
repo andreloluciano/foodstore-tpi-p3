@@ -8,17 +8,19 @@
     <link rel="stylesheet" href="../store.css">
 </head>
 <body>
-
+<div id="mensaje-toast"></div>
 <header>
-    <h1>Geek Food Store</h1>
+    <a href="/src/pages/store/home/home.html" class="logo-link"><h1>Geek Food Store</h1></a>
+    
+
     <nav>
-        <ul>
-            <li><a href="/src/pages/client/home/home.html">Inicio</a></li> 
-            <li><a href="/src/pages/store/cart/cart.html">Carrito</a></li>
-            <li><a href="../../client/orders/orders.html">Mis pedidos</a></li>
-            <li><a href="/src/pages/auth/login/login.html">Panel Admin</a></li>
-        </ul>
-    </nav>
+  <a href="/src/pages/store/cart/cart.html">Carrito</a>
+  <a href="/src/pages/client/orders/orders.html" id="misPedidosLink">Mis pedidos</a>
+
+  <button id="logoutButton">Logout</button>
+
+  <a href="/src/pages/admin/home/home.html" id="adminLink">Panel Admin</a>
+</nav>
 </header>
 <hr>
 <aside>

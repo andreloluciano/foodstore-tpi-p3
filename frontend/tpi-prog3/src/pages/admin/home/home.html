@@ -1,18 +1,25 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AdminHome</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Panel admin</title>
+  <link rel="stylesheet" href="../admin.css">
 </head>
-
 <body>
-    <h1>Hola desde la vista de admin</h1>
-    <button id="logoutButton">Logout</button>
-    <script type="module" src="./home.ts"></script>
+  <h1>Panel de administrador</h1>
+
+  <button id="logoutButton">Logout</button>
+
+  <nav>
+    <a href="../categories/categories.html">Categorias</a>
+    <a href="../products/products.html">Productos</a>
+    <a href="../orders/orders.html">Pedidos</a>
     
+  </nav>
+
+  <section id="contenedor-estadisticas"></section>
+
+  <script type="module" src="./home.ts"></script>
 </body>
-
-
 </html>
