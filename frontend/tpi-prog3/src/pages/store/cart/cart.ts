@@ -187,7 +187,7 @@ const eliminarProducto = (id: number) => {
   renderCarrito();
 };
 
-  // funcion para confirmar pedido
+// funcion para confirmar pedido
 const confirmarPedido = () => {
   const carrito: CartItem[] = JSON.parse(localStorage.getItem("cart") || "[]");
 
@@ -209,6 +209,58 @@ const confirmarPedido = () => {
     alert("Selecciona una forma de pago");
     return;
   }
+
+  const userData = localStorage.getItem("userData");
+
+  if (!userData) {
+    alert("Debes iniciar sesion");
+    return;
+  }
+
+  const usuario = JSON.parse(userData);
+
+  const subtotal = carrito.reduce(
+    (acumulador, producto) =>
+      acumulador + producto.precio * producto.quantity,
+    0
+  );
+
+  const totalPedido = subtotal + costoEnvio;
+
+  // creo pedido confirmado
+  const nuevoPedido = {
+    id: Date.now(),
+    fecha: new Date().toISOString().split("T")[0],
+    estado: "PENDIENTE",
+    total: totalPedido,
+    formaPago: formaPago,
+    telefono: telefono,
+    detalles: carrito.map((producto) => ({
+      cantidad: producto.quantity,
+      subtotal: producto.precio * producto.quantity,
+      producto: producto,
+    })),
+    usuarioDto: {
+      id: usuario.id,
+      nombre: usuario.nombre,
+      apellido: usuario.apellido,
+      mail: usuario.mail,
+      celular: usuario.celular,
+      rol: usuario.rol,
+    },
+  };
+
+  // traigo pedidos confirmados anteriores
+  const pedidosConfirmados = JSON.parse(
+    localStorage.getItem("pedidosConfirmados") || "[]"
+  );
+
+  pedidosConfirmados.push(nuevoPedido);
+
+  localStorage.setItem(
+    "pedidosConfirmados",
+    JSON.stringify(pedidosConfirmados)
+  );
 
   alert("Pedido confirmado correctamente");
 

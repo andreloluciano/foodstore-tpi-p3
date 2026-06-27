@@ -270,3 +270,33 @@ footer {
   margin-top: 20px;
   line-height: 1.8;
 }
+
+h1 {
+  padding: 20px;
+}
+
+#contenedor-pedidos {
+  padding: 20px;
+}
+
+.pedido-card {
+  background-color: white;
+  border-radius: 8px;
+  padding: 18px;
+  margin-bottom: 18px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+}
+
+.pedido-card h3 {
+  color: tomato;
+  margin-bottom: 10px;
+}
+
+.pedido-card p {
+  margin: 8px 0;
+}
+
+.volver-link {
+  display: inline-block;
+  margin: 0 20px 20px;
+}
