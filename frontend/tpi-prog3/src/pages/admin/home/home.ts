@@ -1,11 +1,33 @@
 import { checkAuhtUser, logout } from "../../../utils/auth";
 import { getCategorias, getProductos, getPedidos } from "../../../utils/api";
+import type { Pedido } from "../../../types/pedido";
+
 
 
 // boton para cerrar sesion
 const buttonLogout = document.getElementById(
   "logoutButton"
 ) as HTMLButtonElement;
+
+// funcion para aplicar estados guardados en localstorage
+const aplicarEstadosGuardados = (pedidos: Pedido[]) => {
+  const estadosGuardados = JSON.parse(
+    localStorage.getItem("estadosPedidos") || "{}"
+  );
+
+  return pedidos.map((pedido) => {
+    const estadoGuardado = estadosGuardados[pedido.id];
+
+    if (estadoGuardado) {
+      return {
+        ...pedido,
+        estado: estadoGuardado,
+      };
+    }
+
+    return pedido;
+  });
+};
 
 // traigo  estadisticas
 const contenedorEstadisticas = document.getElementById(
@@ -28,25 +50,33 @@ buttonLogout?.addEventListener("click", () => {
   logout();
 });
 
-// cargar estadisticas del panel
+// funcion para cargar estadisticas del panel
 const cargarEstadisticas = async () => {
   const categorias = await getCategorias(); // traigo categorias
   const productos = await getProductos(); // traigo productos
-  const pedidos = await getPedidos(); // traigo pedidos
+  const pedidosJson = await getPedidos(); // traigo pedidos desde el json
+
+  const pedidosConfirmados: Pedido[] = JSON.parse(
+    localStorage.getItem("pedidosConfirmados") || "[]"
+  ); // traigo pedidos confirmados desde localstorage
+
+  const pedidos = [...pedidosJson, ...pedidosConfirmados]; // junto pedidos del json y localstorage
+
+  const pedidosConEstados = aplicarEstadosGuardados(pedidos); // aplico estados modificados
 
   const productosDisponibles = productos.filter(
     (producto) => producto.disponible
   );
 
-  const pedidosPendientes = pedidos.filter(
+  const pedidosPendientes = pedidosConEstados.filter(
     (pedido) => pedido.estado === "PENDIENTE"
   );
 
-  const pedidosPreparacion = pedidos.filter(
+  const pedidosPreparacion = pedidosConEstados.filter(
     (pedido) => pedido.estado === "EN_PREPARACION"
   );
 
-  const pedidosEntregados = pedidos.filter(
+  const pedidosEntregados = pedidosConEstados.filter(
     (pedido) => pedido.estado === "ENTREGADO"
   );
 
@@ -63,7 +93,7 @@ const cargarEstadisticas = async () => {
 
     <div class="admin-card">
       <h3>Total pedidos</h3>
-      <p>${pedidos.length}</p>
+      <p>${pedidosConEstados.length}</p>
     </div>
 
     <div class="admin-card">
