@@ -4,8 +4,8 @@ Este README corresponde a la plantilla base para el desarrollo del TPI — Parte
 
 ## Entrega
 
-- **Video demostrativo:** [link aquí]
-- **Informe PDF:** [link aquí]
+- **Video demostrativo:** https://youtu.be/9gj0-A3E6ps
+- **Informe PDF:** https://drive.google.com/file/d/1dyVXSi9Kfh4YAq35vSe4ggc-nTbz57D0/view?usp=sharing
 ---
 
 ## Tecnologías
