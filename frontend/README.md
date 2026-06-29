@@ -6,8 +6,8 @@ El proyecto implementa una aplicación web de ecommerce para un negocio de comid
 
 ## Entrega
 
-* **Video demostrativo:** [link aquí]
-* **Informe PDF:** [link aquí]
+- **Video demostrativo:** https://youtu.be/9gj0-A3E6ps
+- **Informe PDF:** https://drive.google.com/file/d/1dyVXSi9Kfh4YAq35vSe4ggc-nTbz57D0/view?usp=sharing
 
 ---
 
